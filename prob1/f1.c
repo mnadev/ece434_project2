@@ -26,7 +26,7 @@ void pfunction()
     int i, j;
     int n = PROCESSMAX;
     printf("Started process %c, pid=%d\n", pName, getpid());
-    
+
     //Get the children details
     for(i = 0; i < n; i++)
     {
@@ -66,8 +66,8 @@ void pfunction()
         }else{
             printf(": has no child process, sleep for sometime \n");
         }
-        
-        
+
+
         for(j = 0; j < process[i].numChild; j++)
         {
             int status;
@@ -78,11 +78,85 @@ void pfunction()
             }
         }
     }
-    
+
     //Sleep for sometime
     sleep(2);
     printf("Process %c, pid=%d: ending process\n", pName, getpid());
 }
+
+void parseLine(char * line, int lineNum){
+    char * tokenLine = (char *) malloc(sizeof(char) * 250);
+    strcpy(tokenLine, line);
+
+    // tokenize the line by spaces
+    char* token = strtok(tokenLine, " ");
+
+    int gotCurrentNode = 0;
+    int gotNumChildren = 0;
+
+    int childrenPtr = 0;
+
+    // create the process info struct
+    processInfo * proc = (processInfo *) malloc(sizeof(processInfo));
+
+    // Parse the tokens
+    while (token != NULL) {
+
+        // get the current node if we haven't already
+        // and store as the process Name
+        if(gotCurrentNode == 0) {
+            proc ->  processName = token[0];
+            gotCurrentNode = 1;
+            token = strtok(NULL, " ");
+            continue;
+        }
+
+        // get the number of children
+        // and store as process name
+        if(gotNumChildren == 0) {
+            proc -> numChild = atoi(token);
+            gotNumChildren = 1;
+            token = strtok(NULL, " ");
+            continue;
+        }
+
+        // set the child into the array
+        proc -> children[childrenPtr] = token[0];
+
+        childrenPtr++;
+
+        token = strtok(NULL, " ");
+    }
+
+    process[lineNum] = *proc;
+
+    return;
+}
+
+// Function to read a line
+void readline(FILE* fp){
+
+    // Malloc a char array. 250 chars should be sufficient
+    char * line = (char *) malloc(sizeof(char) * 250);
+
+    // i points to where we are in the char array
+    int i = 0;
+
+    // Keep reading a char until we hit eof or a new line
+    while(fgets(line[i], 1, fp) != '\n' || !feof(fp)) {
+
+        if(i == 249) {
+            break;
+        }
+
+        i++;
+    }
+
+    // set null terminator
+    line[i] = '\0';
+    return line;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -92,23 +166,31 @@ int main(int argc, char* argv[])
     }
     //input file: read file and input info to array of struct "process"
     //++error handle -- 10 processes max
-    
-    process[0].processName='A'; // A 2 B C
-    process[0].numChild=2;
-    process[0].children[0]='B';
-    process[0].children[1]='C';
 
-    process[1].processName='B'; // B 1 D
-    process[1].numChild=1;
-    process[1].children[0]='D';
+    //input file: read file and input info to array of struct "process"
+    //++error handle -- 10 processes max
 
-    
-    process[2].processName='C'; // C 0
-    process[2].numChild=0;
-    
-    process[3].processName='D'; // D 0
-    process[3].numChild=0;
-    
+    // Assume file is passed in as the second command line argument
+    char * filename = argv[1];
+
+    FILE *fp;
+
+    fp = fopen("filename", "r+");
+
+    // Keep reading a line until eof.
+    // After each line, parse it and generate any nodes.
+
+    int lineNum = 0;
+
+    while (!feof(fp)) {
+        const char *line = readLine(fp);
+        parseLine(line, lineNum);
+
+        lineNum++;
+    }
+
+    fclose(fp);
+
     //the process function:
     pName = process[0].processName;
     pfunction();

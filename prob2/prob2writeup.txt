@@ -1,0 +1,18 @@
+Q1: 
+We have used sleep() in the previous parts to synchronize processes. What is the advantage of the use of signals?
+
+    When we use sleep to synchronize processes, we assume we know how long a program will take to execute some code. We also assume
+that when our sleep is finished the code we want to finish will finish executing. In ideal scenarios, 
+we might be right. But, in reality, a program might take a long time to execute code if the machine has a 
+large computational load. With signals, we remove the time dependence of the processes and make the synchronization completely
+dependent on what code has been executed thus far. 
+    Another advantage of signals is that we can account for different conditions. With sleep(), we just used one
+block of predefined code to handle some event by another process. But, with signals, we can send different signals to a 
+process. Based on whatever signal is sent, the code that is executed will be different. This makes process synchronization
+much more dynamic. It also allows for error handling between processes as well. 
+
+Q2: 
+What can the role of function wait_for_children() be? What benefit does it ensure and what potential problem could its omission bring about?
+
+    The role of the function wait_for_children is so that the program pauses until the children send the SIGCONT signal. By omitting wait_for_children(),
+    our parent processes would exit early and the children would become zombies.
