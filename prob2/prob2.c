@@ -132,7 +132,7 @@ void process_handler(){
                 pName = process[i].children[j];
 
                 //call the processfunction, and return
-                pfunction();
+                process_handler();
                 return;
 
             } else {   //parent process:
@@ -167,7 +167,7 @@ void process_handler(){
 }
 
 // Function to read a line
-void readline(FILE* fp){
+char * readline(FILE* fp){
 
     // Malloc a char array. 250 chars should be sufficient
     char * line = (char *) malloc(sizeof(char) * 250);
@@ -176,9 +176,9 @@ void readline(FILE* fp){
     int i = 0;
 
     // Keep reading a char until we hit eof or a new line
-    while(fgets(line[i], 1, fp) != '\n' || !feof(fp)) {
+    while(fgets(&line[i], 1, fp) && !feof(fp)) {
 
-        if(i == 249) {
+        if(i == 249 || line[i] == '\n') {
             break;
         }
 
@@ -203,7 +203,6 @@ int main(int argc, char* argv[])
     char * filename = argv[1];
 
     FILE *fp;
-
     fp = fopen("filename", "r+");
 
     // Keep reading a line until eof. 
@@ -212,8 +211,7 @@ int main(int argc, char* argv[])
     int lineNum = 0;
 
     while (!feof(fp)) {
-        const char *line = readLine(fp);
-        parseLine(line, lineNum);
+        parseLine(readline(fp), lineNum);
 
         lineNum++;
     }

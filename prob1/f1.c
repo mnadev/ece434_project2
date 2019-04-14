@@ -1,21 +1,25 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h> 
+#include <signal.h>
 #include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include <sys/syscall.h>
+
 
 #define PROCESSMAX 10 //max process size is 10
 #define CHILDRENMAX 3 //max children allowed is 3
 
 // Structures to define the process tree
-struct processInfo
+typedef struct _processInfo
 {
     char processName; //A, B, C ... one char ONLY
     int numChild;
     char children[CHILDRENMAX];//
-};
+} processInfo;
 
 //Define the processes
-struct processInfo process[PROCESSMAX];
+processInfo process[PROCESSMAX];
 
 //Process name
 char pName;
@@ -134,7 +138,7 @@ void parseLine(char * line, int lineNum){
 }
 
 // Function to read a line
-void readline(FILE* fp){
+char * readline(FILE* fp){
 
     // Malloc a char array. 250 chars should be sufficient
     char * line = (char *) malloc(sizeof(char) * 250);
@@ -143,9 +147,9 @@ void readline(FILE* fp){
     int i = 0;
 
     // Keep reading a char until we hit eof or a new line
-    while(fgets(line[i], 1, fp) != '\n' || !feof(fp)) {
+    while(fgets(&line[i], 1, fp) &&  !feof(fp)) {
 
-        if(i == 249) {
+        if(i == 249 || line[i] == '\n') {
             break;
         }
 
@@ -183,8 +187,7 @@ int main(int argc, char* argv[])
     int lineNum = 0;
 
     while (!feof(fp)) {
-        const char *line = readLine(fp);
-        parseLine(line, lineNum);
+        parseLine(readline(fp), lineNum);
 
         lineNum++;
     }
