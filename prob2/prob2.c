@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h> 
-#include <pthread.h>
 #include <signal.h>
-
+#include <fcntl.h> 
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -27,6 +26,8 @@ processInfo process[PROCESSMAX];
 int numProcesses = 0;
 
 char pName;
+
+int eof = 0;
 
 void parseLine(char * line, int lineNum){
     char * tokenLine = (char *) malloc(sizeof(char) * 250);
@@ -167,7 +168,7 @@ void process_handler(){
 }
 
 // Function to read a line
-char * readline(FILE* fp){
+char * readline(int fp){
 
     // Malloc a char array. 250 chars should be sufficient
     char * line = (char *) malloc(sizeof(char) * 250);
@@ -175,15 +176,18 @@ char * readline(FILE* fp){
     // i points to where we are in the char array
     int i = 0;
 
-    // Keep reading a char until we hit eof or a new line
-    while(fgets(&line[i], 1, fp) && !feof(fp)) {
-
-        if(i == 249 || line[i] == '\n') {
-            break;
+    char charIn;
+    do{
+		int status = read(fp, &charIn, 1);
+        if (status == 0) {
+            eof = 1;
+            line[i] = '\0';
+            return line;
         }
+		line[i] = charIn;
+		i++;
 
-        i++;
-    }
+    } while(charIn != '\n');
 
     // set null terminator
     line[i] = '\0';
@@ -200,17 +204,17 @@ int main(int argc, char* argv[])
     //++error handle -- 10 processes max
 
     // Assume file is passed in as the second command line argument
-    char * filename = argv[1];
+    char * filename = "process_tree.txt";
 
-    FILE *fp;
-    fp = fopen("filename", "r+");
+    int fp;
+    fp = open("filename",  O_RDWR);  
 
     // Keep reading a line until eof. 
     // After each line, parse it and generate any nodes.
 
     int lineNum = 0;
 
-    while (!feof(fp)) {
+    while (eof == 0) {
         parseLine(readline(fp), lineNum);
 
         lineNum++;
@@ -222,7 +226,7 @@ int main(int argc, char* argv[])
     pName = process[0].processName;
     process_handler();
 
-    fclose(fp);
+    close(fp);
 
     return 0;
 }

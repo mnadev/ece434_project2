@@ -3,8 +3,11 @@
 #include <string.h>
 #include <unistd.h> 
 #include <signal.h>
+#include <fcntl.h> 
+#include <stdio.h>
 #include <sys/types.h>
-#include <sys/syscall.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 
 #define PROCESSMAX 10 //max process size is 10
@@ -23,6 +26,8 @@ processInfo process[PROCESSMAX];
 
 //Process name
 char pName;
+
+int eof = 0;
 
 //Recursive function
 void pfunction()
@@ -138,7 +143,7 @@ void parseLine(char * line, int lineNum){
 }
 
 // Function to read a line
-char * readline(FILE* fp){
+char * readline(int fp){
 
     // Malloc a char array. 250 chars should be sufficient
     char * line = (char *) malloc(sizeof(char) * 250);
@@ -146,15 +151,18 @@ char * readline(FILE* fp){
     // i points to where we are in the char array
     int i = 0;
 
-    // Keep reading a char until we hit eof or a new line
-    while(fgets(&line[i], 1, fp) &&  !feof(fp)) {
-
-        if(i == 249 || line[i] == '\n') {
-            break;
+    char charIn;
+    do{
+		int status = read(fp, &charIn, 1);
+        if (status == 0) {
+            eof = 1;
+            line[i] = '\0';
+            return line;
         }
+		line[i] = charIn;
+		i++;
 
-        i++;
-    }
+    } while(charIn != '\n');
 
     // set null terminator
     line[i] = '\0';
@@ -164,7 +172,7 @@ char * readline(FILE* fp){
 
 int main(int argc, char* argv[])
 {
-    if(argc < 1){
+    if(argc < 2){
         printf("error!\n");
         return 0;
     }
@@ -177,22 +185,21 @@ int main(int argc, char* argv[])
     // Assume file is passed in as the second command line argument
     char * filename = argv[1];
 
-    FILE *fp;
+    int fp;
+    fp = open("filename",  O_RDWR);  
 
-    fp = fopen("filename", "r+");
-
-    // Keep reading a line until eof.
+    // Keep reading a line until eof. 
     // After each line, parse it and generate any nodes.
 
     int lineNum = 0;
 
-    while (!feof(fp)) {
+    while (eof == 0) {
         parseLine(readline(fp), lineNum);
 
         lineNum++;
     }
-
-    fclose(fp);
+    
+    close(fp);
 
     //the process function:
     pName = process[0].processName;
