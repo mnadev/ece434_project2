@@ -1,0 +1,14 @@
+The design of the program is as follows:
+	We convert the input expression given in the text file to a post-fix expression first, which makes it much easier to build the Tree data
+	structure that will be used to evaluate the expression. As a result, the program consists of stack implementation and associated functions.
+	From the post-fix expression, we build the tree that represents the given expression, and use the recursive function getTreeFromExprRec() 
+	to recursively search through the tree, forking for each child process encountered. IPC is performed with pipes.
+
+Answering questions:
+	Other forms of IPC that could technically be used for the program are shared memory or signals, although both are inferior to the use
+	of pipes in this program. Signals suffer heavily from race conditions, while shared memory might suffer from synchronization issues.
+	Pipes thus are the simplest and most elegant solution to the need of IPC in the program.
+
+	Each process (excluding the leaf processes that represent an integer) will require two pipes, one for each child. It would technically
+	be possible for only 1 pipe to be used for all child processes of a given process, but might introduce a potential race condition if 
+	two children want to write to the pipe at the same time. To be safe, one pipe per child should be used.
