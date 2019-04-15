@@ -1,0 +1,15 @@
+Hi I'm process 5649 and my parent is 4197
+Hi I'm process 5657 and my parent is 5652
+Hi I'm process 5656 and my parent is 5652
+Hi I'm process 5653 and my parent is 5651
+Hi I'm process 5652 and my parent is 5651
+Hi I'm process 5658 and my parent is 5654
+Hi I'm process 5659 and my parent is 5654
+Hi I'm process 5655 and my parent is 5650
+Hi I'm process 5654 and my parent is 5650
+Hi I'm process 5650 and my parent is 5649
+Hi I'm process 5651 and my parent is 5649
+Max = 14516
+Min = 3
+Sum = 30340
+There were 0 number of misbehaving children

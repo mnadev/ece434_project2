@@ -1,0 +1,48 @@
+Part A:
+	All design aspects related to how the program functions, that is, how the process tree splits up the work, is the same as Project 1 Problem2
+	Part C. The new thing in this problem is the use of signals for IPC, and the various race conditions that using signals introduces.
+	Specifically, when using sigaction(), although signals of different types can be queued while a process is running a signal handler, 
+	if the process receives another signal of the same type as a signal that is already being queued, the new incoming signal is dropped.
+	Because any given parent process in the process tree of this program is waiting from results from two children processes, if both children
+	simultaneously send a signal like SIGUSR2 while the parent is processing a signal like SIGUSR1, then one of the SIGUSR1's is dropped and
+	information is lost.
+	To mitigate this, the program first sends 3 different types of signals back to a parent process. SIGUSR1 is used to send a min value,
+	SIGUSR2 is used to send a max value, and SIGPIPE is used to send a sum. SIGPIPE was used because since no pipes are used, a SIGPIPE signal
+	can never be triggered naturally.
+	This solution still poses the race condition mentioned before. Thus, the parent process when forking the 2nd child changes a variable
+	"canSignal" that indicates whether or not the 2nd child is able to send it's information back to the parent. When the parent receives
+	all of the information from the first child it forked, it sends a signal SIGBUS to the 2nd child that sets canSignal to true in the 
+	signal handler, allowing the second child to signal it's information back to the parent.
+	
+	NOTE: Reworking the program to use signals for IPC seemed to introduce a new overhead, since the program will no longer function when
+		accepting an input of more than 10K integers. If attempting to run the program remotely using SSH into the DSV Lab's computers,
+		the SSH connection is terminated when running the program with an input of more than 10K integers, and the user will be unable
+		to reconnect for about 5 minutes.
+
+Part B:
+	First, it will be noted that the additional functionality provided by this version of the program from will never be encountered in practice.
+	It was previously mentioned that because of additional overhead, the program will not run with an input file size of more than 10k integers,
+	but the time it takes for the program to run with said input size is at maximum, 3 seconds. At a minimum, at a leaf process, the parent
+	process will wait 3 seconds, which means the program will never be slow enough to run the additional functions provided by this part.
+
+	The program uses the system call alarm() and a signal handler SIGALRM as the timing mechanism for whether or not a child process is behaving
+	slowly. Once a child process is forked, the child calls alarm() with parameter 3*6*currentLevel. Current level is initially calculated
+	by calculating log base 2 of the input file size, which when taking the ceiling of the result, gets the number of "layers". For each
+	child that is forked, the current level is decremented by 1, until the leaf process is reached and currentLevel = 0. If the alarm
+	were to ever be triggered, SIGALRM is caught, and the handler informs the parent that the child is being slow. This is done by sending
+	the parent a SIGSEGV signal, which when handled, adds the signal sender's PID to a linked list containing all misbehaving children.
+	The child that sent the signal then returns 0 as a partial sum to it's own parent (this is needed to avoid deadlock situations), and kills
+	all of its own children process. If the contribution of any given process is not to be taken into account, then by the nature of the program,
+	it means that the contribution of all of that process's children is also not taken into account, since the contribution of a given process
+	is determined by the contributions from all of it's children unless the process is a leaf process.
+
+	To answer the questions posed in the problem instructions, the contribution of a misbehaving child is substituted with 0 for the sum, and
+	the min/max isn't even sent back to a parent process. By the nature of the program that was written, the root process only calls wait()
+	up to two times, once for each child process since each process only spawns 2 processes, and all child processes wait on their own children.
+
+	It will also be noted that the instructions for this problem were unclear. The problem says to "suspend" the child and check for a contribution
+	later, but this doesn't make sense because if a child is "suspended", then by the definition of the word "suspend", the child would not
+	be performing any computations and the 2nd check for a contribution will be useless. Also, by the time the "root of the overall tree is
+	reached", depending on what that actually means, all children process will already have exited and been waited on by the nature of the program, 
+	so one would be unable to count the number of "live processes", if by "live processes", the instructions mean currently running processes.
+	

@@ -1,0 +1,14 @@
+Hi I'm process 19716 and my parent is 4197
+Hi I'm process 19726 and my parent is 19721
+Hi I'm process 19725 and my parent is 19721
+Hi I'm process 19728 and my parent is 19723
+Hi I'm process 19727 and my parent is 19723
+Hi I'm process 19722 and my parent is 19720
+Hi I'm process 19721 and my parent is 19720
+Hi I'm process 19723 and my parent is 19719
+Hi I'm process 19724 and my parent is 19719
+Hi I'm process 19719 and my parent is 19716
+Hi I'm process 19720 and my parent is 19716
+Max = 14516
+Min = 3
+Sum = 30340
