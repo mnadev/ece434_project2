@@ -5,7 +5,7 @@ Problem1:
 Problem2:
 	gcc prob2/prob2.c -O3 -o Prob2
 Problem3:
-	gcc prob3/Problem3.c -O3 -o Prob3
+	gcc prob3/Problem3.c -O3 -o Prob3 -w
 Problem4PtA:
 	gcc prob4/Problem4_PartA.c -O3 -o Prob4PtA
 Problem4PtB:
