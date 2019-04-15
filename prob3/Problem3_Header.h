@@ -22,7 +22,7 @@ char stack_peek(Stack* stack);
 int operatorValue(char op);
 
 //Defining all the other function prototypes:
-void evaluateTree(Tree_node* rootNode)
+int evaluateTree(Tree_node* rootNode);
 Tree_node* getTreeFromExpr(char* postfix);
 void getTreeFromExprRec(char** postfixArray, Tree_node* currentNode);
 char * readline(int fp);
