@@ -1,0 +1,39 @@
+For an example input file:
+
+A 2 B C
+B 1 D
+C 0 
+D 0
+
+The tree looks like:
+
+A - B - D
+  \ 
+    C
+
+We get this output:
+
+Started process A, pid=47914
+Process A, pid=47914: Forked B, pid=47915
+Process A, pid=47914: Forked C, pid=47916
+Process A, pid=47914: Waiting for children to end 
+Started process B, pid=47915
+Started process C, pid=47916
+Process C, pid=47916: has no child process, sleep for sometime 
+Process B, pid=47915: Forked D, pid=47917
+Process B, pid=47915: Waiting for children to end 
+Started process D, pid=47917
+Process D, pid=47917: has no child process, sleep for sometime 
+Process C, pid=47916: ending process
+Process D, pid=47917: ending process
+Process B(pid=47915)'s child process D with pid=47917 has exited
+Process B, pid=47915: ending process
+Process A(pid=47914)'s child process B with pid=47915 has exited
+Process A(pid=47914)'s child process C with pid=47916 has exited
+Process A, pid=47914: ending process
+
+Order of appearance of start and termination messages:
+
+First, all the processes are created, 
+Then the leaf processes start to exit, 
+A parent process only exits when all its children has exited.
